@@ -1,0 +1,43 @@
+name: Weekly SmartDNS Update
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # 每周日凌晨 00:00 UTC
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Clone dnsmasq-china-list
+      run: |
+        git clone https://github.com/felixonmars/dnsmasq-china-list.git /tmp/dnsmasq-china-list
+
+    - name: Generate smartdns configurations
+      run: |
+        cd /tmp/dnsmasq-china-list
+        make smartdns SERVER=CN
+
+    - name: Copy generated files
+      run: |
+        cp /tmp/dnsmasq-china-list/*.smartdns.conf .
+
+    - name: Check for changes
+      id: diff-check
+      run: |
+        if ! git diff --quiet HEAD -- *.smartdns.conf; then
+          echo "::set-output name=has-changes::true"
+        else
+          echo "::set-output name=has-changes::false"
+        fi
+
+    - name: Commit and push if changed
+      if: steps.diff-check.outputs.has-changes == 'true'
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add *.smartdns.conf
+        git commit -m "Weekly update of smartdns configurations"
+        git push
