@@ -34,11 +34,7 @@ jobs:
           echo "::set-output name=has-changes::false"
         fi
 
-    - name: Commit and push if changed
-      if: steps.diff-check.outputs.has-changes == 'true'
-      run: |
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
-        git add *.smartdns.conf
-        git commit -m "Weekly update of smartdns configurations"
-        git push
+    - name: Commit & Push changes
+      uses: actions-js/push@master
+      with:
+         github_token: ${{ secrets.GITHUB_TOKEN  }}
