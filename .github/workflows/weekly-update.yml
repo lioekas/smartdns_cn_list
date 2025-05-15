@@ -29,9 +29,9 @@ jobs:
       id: diff-check
       run: |
         if ! git diff --quiet HEAD -- *.smartdns.conf; then
-          echo "::set-output name=has-changes::true"
+          echo "has-changes=true" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=has-changes::false"
+          echo "has-changes=false" >> $GITHUB_OUTPUT
         fi
 
     - name: Commit & Push changes
